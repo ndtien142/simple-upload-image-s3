@@ -1,8 +1,12 @@
 const AWS = require("aws-sdk");
-const KEY_ID = "AKIAZNZFAPIDOFKSGXQX";
-const SECRET_KEY = "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";
 const fs = require("fs");
-const BUCKET_NAME = "iot-bucket-documentation";
+const { uuid } = require("uuidv4");
+require("dotenv").config();
+
+// import env
+const KEY_ID = process.env.KEY_ID || "";
+const SECRET_KEY = process.env.SECRET_KEY || "";
+const BUCKET_NAME = process.env.BUCKET_NAME || "";
 
 const s3 = new AWS.S3({
   accessKeyId: KEY_ID,
@@ -23,13 +27,17 @@ const s3 = new AWS.S3({
 
 const uploadFile = (fileName) => {
   const fileContent = fs.readFileSync(fileName);
+  const fileExtension = fileName.split(".").pop();
+  const key = `${uuid()}.${fileExtension}`;
+  const contentType = `image/${fileExtension}`.toUpperCase();
 
   const params = {
     Bucket: BUCKET_NAME,
-    Key: "photo.jpg",
+    Key: key,
     Body: fileContent,
-    ContentType: "image/JPG",
+    ContentType: contentType,
   };
+
   s3.upload(params, (err, data) => {
     if (err) {
       console.log(err);
